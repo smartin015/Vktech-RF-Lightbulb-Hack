@@ -4,8 +4,15 @@
 Adapted from i2c-test.py from Peter Huewe
 """
 import sys
-from pyBusPirateLite.I2C import *
 import argparse
+import binascii
+
+try:
+  from pyBusPirateLite.I2C import *
+except ImportError:
+  sys.stderr.write("Could not find pyBusPirateLite library!\n")
+  sys.stderr.write("See: http://dangerousprototypes.com/docs/Bus_Pirate_Scripting_in_Python\n")
+  sys.exit(1)
  
  
 def i2c_write_data(data):
@@ -31,6 +38,7 @@ def i2c_read_bytes(address, numbytes, ret=False):
     if ret:
         return data_out
  
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(sys.argv[0])
     parser.add_argument("-o", "--output", dest="outfile", metavar="OUTFILE", type=argparse.FileType('wb'),
@@ -73,10 +81,12 @@ if __name__ == '__main__':
         # Reset the address
         i2c_write_data([0xa0 + ((block / args.bsize) << 1), 0])
         print 0xa0 + ((block / args.bsize) << 1)
-        args.outfile.write("".join([chr(x) for x in i2c_read_bytes([0xa1 + ((block / args.bsize) << 1)], args.bsize, True)]))
+        data = " ".join([hex(x) for x in i2c_read_bytes([0xa1 + ((block / args.bsize) << 1)], args.bsize, True)])
+        args.outfile.write((data))
     if args.size % 16 != 0:
         end = 16 * (args.size / args.bsize)
-        args.outfile.write("".join([chr(x) for x in i2c_read_bytes([0xa1 + ((args.size / args.bsize) << 1)], args.size % args.bsize, True)]))
+        data = " ".join([hex(x) for x in i2c_read_bytes([0xa1 + ((args.size / args.bsize) << 1)], args.size % args.bsize, True)])
+        args.outfile.write((data))
     args.outfile.close()
  
     print "Reset Bus Pirate to user terminal: "
