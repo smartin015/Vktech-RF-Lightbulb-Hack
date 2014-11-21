@@ -16,7 +16,11 @@ void setup() {
 void loop() {
   for (int i = 0; i < 4; i++) {
     digitalWrite(LED_PIN, HIGH);
-    encoder.sendMsg(address, i);
+    // Send multiple times to ensure the bulbs receive the message. 
+    // They only toggle once.
+    for (int j = 0; j < 5; j++) {
+      encoder.sendMsg(address, i);
+    }
     digitalWrite(LED_PIN, LOW);
     delay(250);
   }
